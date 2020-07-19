@@ -7,7 +7,7 @@
 # define LEFT_OUT_PIN 12             // Left channel data out pin to LEDs [6]
 # define RIGHT_OUT_PIN 13            // Right channel data out pin to LEDs [5]
 # define LEFT_IN_PIN 34             // Left aux in signal [A5]
-# define RIGHT_IN_PIN 35            // Right aux in signal [A4]
+//# define RIGHT_IN_PIN 35            // Right aux in signal [A4]
 # define BTN_PIN 18                  // Push button on this pin [3]
 # define DEBOUNCE_MS 20             // Number of ms to debounce the button [20]
 # define LONG_PRESS 500             // Number of ms to hold the button to count as long press [500]
@@ -24,11 +24,7 @@
 # define PATTERN_TIME 10            // Seconds to show eaach pattern on auto [10]
 # define STEREO false //true                // If true, L&R channels are independent. If false, both L&R outputs display same data from L audio channel [false]
 
-typedef struct data_struct {
-   int dataOut;
-} data_struct;
-
-data_struct dataOut;
+uint8_t RIGHT_IN_PIN;
 
 // --------------------
 // -----LED STUFF------
@@ -81,13 +77,8 @@ void incrementButtonPushCounter() {
 }
 //callback function that will be executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(&dataOut, incomingData, sizeof(dataOut));
-  Serial.print("Bytes received: ");
-  Serial.println(len);
-  Serial.print("x: ");
-  Serial.println(dataOut.dataOut);
-  Serial.print("y: ");
-  Serial.println(dataOut.dataOut);
+  RIGHT_IN_PIN = incomingData;
+  Serial.print("Bytes received");
   Serial.println();
 }
  
@@ -254,18 +245,18 @@ uint16_t auxReading(uint8_t channel) {
     n = abs(n - 512 - DC_OFFSET); // Center on zero
     n = (n <= NOISE) ? 0 : (n - NOISE); // Remove noise/hum
     lvlLeft = ((lvlLeft * 7) + n) >> 3; // "Dampened" reading else looks twitchy (>>3 is divide by 8)
-    volLeft[volCountLeft] = dataOut.dataOut; // Save sample for dynamic leveling
+    volLeft[volCountLeft] = n; // Save sample for dynamic leveling
     volCountLeft = ++volCountLeft % SAMPLES;
     // Calculate bar height based on dynamic min/max levels (fixed point):
     height = TOP * (lvlLeft - minLvlAvgLeft) / (long)(maxLvlAvgLeft - minLvlAvgLeft);
   }
   
   else {
-    int n = analogRead(RIGHT_IN_PIN); // Raw reading from mic
+    int n = RIGHT_IN_PIN; // Raw reading from mic
     n = abs(n - 512 - DC_OFFSET); // Center on zero
     n = (n <= NOISE) ? 0 : (n - NOISE); // Remove noise/hum
     lvlRight = ((lvlRight * 7) + n) >> 3; // "Dampened" reading (else looks twitchy)
-    volRight[volCountRight] = dataOut.dataOut; // Save sample for dynamic leveling
+    volRight[volCountRight] = n; // Save sample for dynamic leveling
     volCountRight = ++volCountRight % SAMPLES;
     // Calculate bar height based on dynamic min/max levels (fixed point):
     height = TOP * (lvlRight - minLvlAvgRight) / (long)(maxLvlAvgRight - minLvlAvgRight);

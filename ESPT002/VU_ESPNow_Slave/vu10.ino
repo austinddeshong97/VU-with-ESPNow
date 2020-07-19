@@ -37,7 +37,7 @@ void soundtun() {
   }
 
   if (STEREO) {
-    int sampleRight = abs(analogRead(RIGHT_IN_PIN) - 512 - DC_OFFSET);
+    int sampleRight = (RIGHT_IN_PIN - 512 - DC_OFFSET);
     CRGB newcolourRight = ColorFromPalette(currentPalette, constrain(sampleRight, 0, 255), constrain(sampleRight, 0, 255), LINEARBLEND);
     nblend(ledsRight[0], newcolourRight, 128);
     for (int i = N_PIXELS - 1; i > 0; i--) {

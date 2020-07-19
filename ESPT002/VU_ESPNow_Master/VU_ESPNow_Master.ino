@@ -29,11 +29,7 @@
 // --------------------
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-typedef struct data_struct {
-   int* dataOut;
-} data_struct;
-
-data_struct dataOut;
+int dataOut;
 
 // callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
@@ -50,11 +46,11 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 // --------------------
 // -----LED STUFF------
 // --------------------
-uint8_t volCountLeft = 0;           // Frame counter for storing past volume data
+/*uint8_t volCountLeft = 0;           // Frame counter for storing past volume data
 int volLeft[SAMPLES];               // Collection of prior volume samples
 int lvlLeft = 0;                    // Current "dampened" audio level
 int minLvlAvgLeft = 0;              // For dynamic adjustment of graph low & high
-int maxLvlAvgLeft = 512;
+int maxLvlAvgLeft = 512;*/
 
 uint8_t volCountRight = 0;          // Frame counter for storing past volume data
 int volRight[SAMPLES];              // Collection of prior volume samples
@@ -66,54 +62,10 @@ int maxLvlAvgRight = 512;
 CRGB ledsLeft[N_PIXELS];
 CRGB ledsRight[N_PIXELS];
 
-uint8_t myhue = 0;
-/*
-void vu4(bool is_centered, uint8_t channel);
-void vu5(bool is_centered, uint8_t channel);
-void vu6(bool is_centered, uint8_t channel);
-void vu7(bool show_background);
-void vu8();
-void vu9();
-void vu10();
-void balls();
-void fire();
-void juggle();
-void ripple(boolean show_background);
-void sinelon();
-void twinkle();
-void rainbow(uint8_t rate);
-
-// --------------------
-// ----BUTTON STUFF----
-// --------------------
-uint8_t state = 0;
-int buttonPushCounter = 0;
-bool autoChangeVisuals = false;
-Button modeBtn(BTN_PIN, DEBOUNCE_MS);
-
-
-void incrementButtonPushCounter() {
-  buttonPushCounter = ++buttonPushCounter %17;
-  EEPROM.write(1, buttonPushCounter);
-}
-*/
 // --------------------
 // -------SETUP--------
 // --------------------
 void setup() {
-
-  //LEDS
-  //FastLED.addLeds < LED_TYPE, LEFT_OUT_PIN, COLOR_ORDER > (ledsLeft, N_PIXELS).setCorrection(TypicalLEDStrip);
-  //FastLED.addLeds < LED_TYPE, RIGHT_OUT_PIN, COLOR_ORDER > (ledsRight, N_PIXELS).setCorrection(TypicalLEDStrip);
-  //FastLED.setBrightness(BRIGHTNESS);
-  //FastLED.setMaxPowerInVoltsAndMilliamps(5, MAX_MILLIAMPS);
-
-  //modeBtn.begin();
-
-  //buttonPushCounter = (int)EEPROM.read(1); // load previous setting
-  //buttonPushCounter = 0;
-  //Serial.print("Starting pattern ");
-  //Serial.println(buttonPushCounter);
   
   //ESP Now
   Serial.begin(115200);
@@ -140,227 +92,10 @@ void setup() {
 }
 
 void loop(){
-  auxReading(0);
-  /*
-  // Read button
-  modeBtn.read(); 
-  switch (state) {
-    case 0:                
-      if (modeBtn.wasReleased()) {
-        Serial.print("Short press, pattern ");
-        Serial.println(buttonPushCounter);
-        incrementButtonPushCounter();
-        autoChangeVisuals = false;
-      }
-      else if (modeBtn.pressedFor(LONG_PRESS))
-        state = 1;
-      break;
-    
-    case 1:
-      if (modeBtn.wasReleased()) {
-        state = 0;
-        Serial.print("Long press, auto, pattern ");
-        Serial.println(buttonPushCounter);
-        autoChangeVisuals = true;
-      }
-      break;
-  }
+  dataOut = analogRead(RIGHT_IN_PIN);
   
-  // Switch pattern if on auto
-  if(autoChangeVisuals){
-    EVERY_N_SECONDS(PATTERN_TIME) { 
-      incrementButtonPushCounter();
-      Serial.print("Auto, pattern ");
-      Serial.println(buttonPushCounter); 
-    }
-  }
-
-  // Run selected pattern
-  switch (buttonPushCounter) {
-    case 0:
-      vu4(false, 0);
-      if (STEREO) vu4(false, 1);
-      else copyLeftToRight();
-      break;
   
-    case 1:
-      vu4(true, 0);
-      if (STEREO) vu4(true, 1);
-      else copyLeftToRight();
-      break;
-  
-    case 2:
-      vu5(false, 0);
-      if (STEREO) vu5(false, 1);
-      else copyLeftToRight();
-      break;
-  
-    case 3:
-      vu5(true, 0);
-      if (STEREO) vu5(true, 1);
-      else copyLeftToRight();
-      break;
-  
-    case 4:
-      vu6(false, 0);
-      if (STEREO) vu6(false, 1);
-      else copyLeftToRight();
-      break;
-      
-    case 5:
-      vu7(true);
-      copyLeftToRight();
-      break;
-  
-    case 6:
-      vu8();
-      copyLeftToRight();
-      break;
-  
-    case 7:
-      vu9();
-      break;
-  
-    case 8:
-      vu10();
-      break;
-    
-    case 9:
-      vu7(false);
-      copyLeftToRight();
-      break;
-  
-    case 10:
-      twinkle();
-      break;
-  
-    case 11:
-      sinelon();
-      break;
-  
-    case 12:
-      balls();
-      break;
-  
-    case 13:
-      juggle();
-      break;
-  
-    case 14:
-      fire();
-      break;
-  
-    case 15:
-      ripple(false);
-      break;
-  
-    case 16:
-      rainbow(10);
-      break;
-  }
-*/
-}
-// ------------------
-// -- VU functions --
-// ------------------
-
-uint16_t auxReading(uint8_t channel) {
-
-  int n = 0;
-  uint16_t height = 0;
-
-  if(channel == 0) {
-    int n = analogRead(LEFT_IN_PIN); // Raw reading from left line in
-    n = abs(n - 512 - DC_OFFSET); // Center on zero
-    n = (n <= NOISE) ? 0 : (n - NOISE); // Remove noise/hum
-    lvlLeft = ((lvlLeft * 7) + n) >> 3; // "Dampened" reading else looks twitchy (>>3 is divide by 8)
-    volLeft[volCountLeft] = n; // Save sample for dynamic leveling
-    volCountLeft = ++volCountLeft % SAMPLES;
-    // Calculate bar height based on dynamic min/max levels (fixed point):
-    height = TOP * (lvlLeft - minLvlAvgLeft) / (long)(maxLvlAvgLeft - minLvlAvgLeft);
-  }
-  
-  else {
-    int n = analogRead(RIGHT_IN_PIN); // Raw reading from mic
-    n = abs(n - 512 - DC_OFFSET); // Center on zero
-    n = (n <= NOISE) ? 0 : (n - NOISE); // Remove noise/hum
-    lvlRight = ((lvlRight * 7) + n) >> 3; // "Dampened" reading (else looks twitchy)
-    volRight[volCountRight] = n; // Save sample for dynamic leveling
-    volCountRight = ++volCountRight % SAMPLES;
-    // Calculate bar height based on dynamic min/max levels (fixed point):
-    height = TOP * (lvlRight - minLvlAvgRight) / (long)(maxLvlAvgRight - minLvlAvgRight);
-  }
-
-  // Calculate bar height based on dynamic min/max levels (fixed point):
-  height = constrain(height, 0, TOP);
-  return height;
-  dataOut.dataOut = volRight;
-}
-
-void copyLeftToRight() {
-  for (uint8_t i = 0; i < N_PIXELS; i++) {
-    ledsRight[i] = ledsLeft[i];
-  }
-}
-
-/*
- * Function for dropping the peak
- */
-uint8_t peakLeft, peakRight;
-void dropPeak(uint8_t channel) {
-  
-  static uint8_t dotCountLeft, dotCountRight;
- 
-  if(channel == 0) {
-    if(++dotCountLeft >= PEAK_FALL) { //fall rate 
-      if(peakLeft > 0) peakLeft--;
-      dotCountLeft = 0;
-    }
-  } else {
-    if(++dotCountRight >= PEAK_FALL) { //fall rate 
-      if(peakRight > 0) peakRight--;
-      dotCountRight = 0;
-    }
-  }
-}
-
-/*
- * Function for averaging the sample readings
- */
-void averageReadings(uint8_t channel) {
-
-  uint16_t minLvl, maxLvl;
-
-  // minLvl and maxLvl indicate the volume range over prior frames, used
-  // for vertically scaling the output graph (so it looks interesting
-  // regardless of volume level).  If they're too close together though
-  // (e.g. at very low volume levels) the graph becomes super coarse
-  // and 'jumpy'...so keep some minimum distance between them (this
-  // also lets the graph go to zero when no sound is playing):
-  if(channel == 0) {
-    minLvl = maxLvl = volLeft[0];
-    for (int i = 1; i < SAMPLES; i++) {
-      if (volLeft[i] < minLvl) minLvl = volLeft[i];
-      else if (volLeft[i] > maxLvl) maxLvl = volLeft[i];
-    }
-    if ((maxLvl - minLvl) < TOP) maxLvl = minLvl + TOP;
-    
-    minLvlAvgLeft = (minLvlAvgLeft * 63 + minLvl) >> 6; // Dampen min/max levels
-    maxLvlAvgLeft = (maxLvlAvgLeft * 63 + maxLvl) >> 6; // (fake rolling average)
-  }
-
-  else {
-    minLvl = maxLvl = volRight[0];
-    for (int i = 1; i < SAMPLES; i++) {
-      if (volRight[i] < minLvl) minLvl = volRight[i];
-      else if (volRight[i] > maxLvl) maxLvl = volRight[i];
-    }
-    if ((maxLvl - minLvl) < TOP) maxLvl = minLvl + TOP;
-    minLvlAvgRight = (minLvlAvgRight * 63 + minLvl) >> 6; // Dampen min/max levels
-    maxLvlAvgRight = (maxLvlAvgRight * 63 + maxLvl) >> 6; // (fake rolling average)
-  }
-  
-  esp_err_t result = esp_now_send(0, (uint8_t *) &volRight, sizeof(data_struct));
+  esp_err_t result = esp_now_send(0, (uint8_t *) &dataOut, sizeof(dataOut));
    
   if (result == ESP_OK) {
     Serial.println("Sent with success");
