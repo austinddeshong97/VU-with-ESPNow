@@ -77,7 +77,7 @@ void incrementButtonPushCounter() {
 }
 //callback function that will be executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  RIGHT_IN_PIN = incomingData;
+  memcpy(&RIGHT_IN_PIN, incomingData, sizeof(incomingData));
   Serial.print("Bytes received");
   Serial.println();
 }
@@ -110,7 +110,7 @@ void setup() {
   
   // Once ESPNow is successfully Init, we will register for recv CB to
   // get recv packer info
-  esp_now_register_recv_cb(OnDataRecv);
+   esp_now_register_recv_cb(OnDataRecv);
 }
  
 void loop() {
@@ -330,4 +330,3 @@ void averageReadings(uint8_t channel) {
     maxLvlAvgRight = (maxLvlAvgRight * 63 + maxLvl) >> 6; // (fake rolling average)
   }
 }
-
