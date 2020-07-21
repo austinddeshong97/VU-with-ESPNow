@@ -9,7 +9,7 @@ uint8_t broadcastAddress1[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //uint8_t broadcastAddress3[] = {0xFF, , , , , };
 
 typedef struct test_struct {
-  int x;
+  uint8_t x;
   int y;
 } test_struct;
 
@@ -66,6 +66,10 @@ void setup() {
  
 void loop() {
   test.x = analogRead(RIGHT_IN_PIN);
+
+  Serial.println(analogRead(RIGHT_IN_PIN));
+
+  //Serial.println(test.x);
  
   esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
    

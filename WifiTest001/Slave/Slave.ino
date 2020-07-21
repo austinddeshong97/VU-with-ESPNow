@@ -4,7 +4,7 @@
 //Structure example to receive data
 //Must match the sender structure
 typedef struct test_struct {
-  int x;
+  uint8_t x;
   int y;
 } test_struct;
 
