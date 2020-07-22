@@ -1,7 +1,7 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-#define RIGHT_IN_PIN 35
+#define RIGHT_IN_PIN 32
 
 // REPLACE WITH YOUR ESP RECEIVER'S MAC ADDRESS
 uint8_t broadcastAddress1[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -65,19 +65,20 @@ void setup() {
 }
  
 void loop() {
-  test.x = analogRead(RIGHT_IN_PIN);
+  //test.x = analogRead(RIGHT_IN_PIN);
 
   Serial.println(analogRead(RIGHT_IN_PIN));
 
   //Serial.println(test.x);
  
-  esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
+  //esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
    
-  if (result == ESP_OK) {
+  /*if (result == ESP_OK) {
     Serial.println("Sent with success");
   }
   else {
     Serial.println("Error sending the data");
   }
   delay(2000);
+  */
 }
