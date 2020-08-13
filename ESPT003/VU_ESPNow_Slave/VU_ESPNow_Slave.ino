@@ -250,7 +250,7 @@ uint16_t auxReading(uint8_t channel) {
     n = abs(n - 512 - DC_OFFSET); // Center on zero
     n = (n <= NOISE) ? 0 : (n - NOISE); // Remove noise/hum
     lvlLeft = ((lvlLeft * 7) + n) >> 3; // "Dampened" reading else looks twitchy (>>3 is divide by 8)
-    volLeft[volCountLeft] = n; // Save sample for dynamic leveling
+    volLeft[volCountLeft] = n*1.25; // Save sample for dynamic leveling
     volCountLeft = ++volCountLeft % SAMPLES;
     // Calculate bar height based on dynamic min/max levels (fixed point):
     height = TOP * (lvlLeft - minLvlAvgLeft) / (long)(maxLvlAvgLeft - minLvlAvgLeft);
