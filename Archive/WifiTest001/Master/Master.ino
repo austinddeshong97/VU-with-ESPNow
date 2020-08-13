@@ -1,18 +1,15 @@
 #include <esp_now.h>
 #include <WiFi.h>
-#include "soc/sens_reg.h" // needed for manipulating ADC2 control register
-uint64_t reg_b; // Used to store ADC2 control register
-#define PIN 34 // Substitute xx with your ADC2 Pin number
-int value;
-#define RIGHT_IN_PIN 34
+
+#define RIGHT_IN_PIN 32
 
 // REPLACE WITH YOUR ESP RECEIVER'S MAC ADDRESS
-uint8_t broadcastAddress1[] = {0x24, 0x62, 0xAB, 0xFB, 0x09, 0x84};
+uint8_t broadcastAddress1[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 //uint8_t broadcastAddress2[] = {0xFF, , , , , };
 //uint8_t broadcastAddress3[] = {0xFF, , , , , };
 
 typedef struct test_struct {
-  int x;
+  uint8_t x;
   int y;
 } test_struct;
 
@@ -32,10 +29,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
  
 void setup() {
   Serial.begin(115200);
-
  
-  // Save ADC2 control register value : Do this before begin Wifi/Bluetooth
-  reg_b = READ_PERI_REG(SENS_SAR_READ_CTRL2_REG);
   WiFi.mode(WIFI_STA);
  
   if (esp_now_init() != ESP_OK) {
@@ -71,22 +65,20 @@ void setup() {
 }
  
 void loop() {
-  WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
-  //VERY IMPORTANT: DO THIS TO NOT HAVE INVERTED VALUES!
-  SET_PERI_REG_MASK(SENS_SAR_READ_CTRL2_REG, SENS_SAR2_DATA_INV);
-  value = analogRead(PIN);
-  delay(1);
-  //We have to do the 2 previous instructions BEFORE EVERY analogRead() calling!
-  test.x = value;
+  //test.x = analogRead(RIGHT_IN_PIN);
+
+  Serial.println(analogRead(RIGHT_IN_PIN));
+
+  //Serial.println(test.x);
  
-  esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
-/*   
-  if (result == ESP_OK) {
+  //esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
+   
+  /*if (result == ESP_OK) {
     Serial.println("Sent with success");
   }
   else {
     Serial.println("Error sending the data");
   }
-  //delay(30);
-*/
+  delay(2000);
+  */
 }
